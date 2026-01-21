@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dan's Fun Zone</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            text-align: center;
+            padding: 40px 40px 60px;
+            background: linear-gradient(135deg, #ED1166 0%, #800E38 100%);
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            color: #FBD4D5;
+            font-size: 56px;
+            margin: 0 0 60px 0;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5), 
+                         0 0 20px rgba(237,17,102,0.6),
+                         0 0 40px rgba(237,17,102,0.4);
+            animation: pulse 2s ease-in-out infinite;
+            letter-spacing: 4px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .image-container {
+            margin: 0 auto 40px;
+            display: inline-block;
+        }
+
+        .rotating-image {
+            width: 400px;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 8px solid #FBD4D5;
+            box-shadow: 0 0 40px rgba(251,212,213,0.6),
+                        0 10px 40px rgba(0,0,0,0.4),
+                        inset 0 0 20px rgba(255,255,255,0.2);
+            animation: rotate 8s linear infinite, float 3s ease-in-out infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+        }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 30px 20px 40px;
+            }
+
+            h1 {
+                font-size: 42px;
+                margin: 0 0 40px 0;
+                letter-spacing: 2px;
+            }
+
+            .rotating-image {
+                width: 300px;
+                height: 300px;
+                border: 6px solid #FBD4D5;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 15px 30px;
+            }
+
+            h1 {
+                font-size: 32px;
+                margin: 0 0 30px 0;
+                letter-spacing: 1px;
+            }
+
+            .rotating-image {
+                width: 240px;
+                height: 240px;
+                border: 5px solid #FBD4D5;
+            }
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+        }
+
+        .button-container {
+            margin-top: 40px;
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 0 20px;
+        }
+
+        .fun-button {
+            padding: 18px 45px;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(45deg, #f093fb 0%, #f5576c 100%);
+            border: 3px solid #FFD700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3),
+                        0 0 20px rgba(255,215,0,0.3);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Mobile button styles */
+        @media (max-width: 768px) {
+            .button-container {
+                margin-top: 30px;
+                gap: 15px;
+            }
+
+            .fun-button {
+                padding: 15px 35px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .button-container {
+                margin-top: 20px;
+                gap: 12px;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .fun-button {
+                padding: 14px 30px;
+                font-size: 16px;
+                width: 80%;
+                max-width: 250px;
+            }
+        }
+
+        .fun-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .fun-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .fun-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4),
+                        0 0 30px rgba(255,215,0,0.5);
+            border-color: white;
+        }
+
+        .fun-button:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .fun-button span {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dan's fun zone*</h1>
+    
+    <div class="image-container">
+        <img src="dan.png" alt="Dan" class="rotating-image">
+    </div>
+    
+    <div class="button-container">
+        <button class="fun-button" onclick="window.location.href='icebreaker_form.html'"><span>Building something together </span></button>
+        <button class="fun-button" onclick="window.location.href='nz-puzzle-standalone 20.html'"><span>Puzzel lvl 1</span></button>
+        <button class="fun-button" onclick="window.location.href='nz-puzzle-standalone 5.html'"><span>Puzzel lvl 2</span></button>
+    </div>
+</body>
+</html>

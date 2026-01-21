@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NZ $20 Note Puzzle Game</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const NZNotePuzzle = () => {
+            const [pieces, setPieces] = useState([]);
+            const [draggedPiece, setDraggedPiece] = useState(null);
+            const [timer, setTimer] = useState(0);
+            const [isRunning, setIsRunning] = useState(false);
+            const [isComplete, setIsComplete] = useState(false);
+            const [imageUrls, setImageUrls] = useState({});
+            const timerRef = useRef(null);
+
+            useEffect(() => {
+                const loadImages = () => {
+                    const urls = {};
+                    for (let i = 1; i <= 4; i++) {
+                        urls[i] = `${i}.png`;
+                    }
+                    setImageUrls(urls);
+                };
+                loadImages();
+                initializePuzzle();
+            }, []);
+
+            useEffect(() => {
+                if (isRunning && !isComplete) {
+                    timerRef.current = setInterval(() => {
+                        setTimer(t => t + 1);
+                    }, 1000);
+                } else {
+                    clearInterval(timerRef.current);
+                }
+                return () => clearInterval(timerRef.current);
+            }, [isRunning, isComplete]);
+
+            const initializePuzzle = () => {
+                const initialPieces = Array.from({ length: 4 }, (_, i) => ({
+                    id: i,
+                    correctPosition: i,
+                    currentPosition: i
+                }));
+                setPieces(shuffleArray(initialPieces));
+                setTimer(0);
+                setIsRunning(true);
+                setIsComplete(false);
+            };
+
+            const shuffleArray = (array) => {
+                const arr = [...array];
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr.map((piece, index) => ({
+                    ...piece,
+                    currentPosition: index
+                }));
+            };
+
+            const handleDragStart = (e, piece) => {
+                setDraggedPiece(piece);
+                e.dataTransfer.effectAllowed = 'move';
+            };
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+            };
+
+            const handleDrop = (e, targetPiece) => {
+                e.preventDefault();
+                if (!draggedPiece || draggedPiece.id === targetPiece.id) return;
+
+                const newPieces = [...pieces];
+                const draggedIndex = newPieces.findIndex(p => p.id === draggedPiece.id);
+                const targetIndex = newPieces.findIndex(p => p.id === targetPiece.id);
+
+                [newPieces[draggedIndex], newPieces[targetIndex]] = 
+                [newPieces[targetIndex], newPieces[draggedIndex]];
+
+                newPieces.forEach((piece, index) => {
+                    piece.currentPosition = index;
+                });
+
+                setPieces(newPieces);
+                setDraggedPiece(null);
+                checkCompletion(newPieces);
+            };
+
+            const checkCompletion = (currentPieces) => {
+                const complete = currentPieces.every((piece, index) => piece.correctPosition === index);
+                if (complete) {
+                    setIsComplete(true);
+                    setIsRunning(false);
+                }
+            };
+
+            const formatTime = (seconds) => {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-teal-100 to-emerald-200 p-8">
+                    <div className="max-w-5xl mx-auto">
+                        <div className="text-center mb-8">
+                            <h1 className="text-4xl font-bold text-emerald-900 mb-2">
+                                NZ $20 Note Puzzle
+                            </h1>
+                            <p className="text-emerald-700">Drag and drop pieces to complete the banknote</p>
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="text-2xl font-bold text-emerald-900">
+                                        Time: {formatTime(timer)}
+                                    </div>
+                                    {isComplete && (
+                                        <div className="flex items-center gap-2 text-emerald-600 font-semibold">
+                                            <span>🏆</span>
+                                            <span>Completed!</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={initializePuzzle}
+                                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition"
+                                >
+                                    <span>🔀</span>
+                                    New Game
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-1 bg-gray-300 p-1 rounded-lg max-w-3xl mx-auto">
+                                {pieces.map((piece) => (
+                                    <div
+                                        key={piece.id}
+                                        draggable
+                                        onDragStart={(e) => handleDragStart(e, piece)}
+                                        onDragOver={handleDragOver}
+                                        onDrop={(e) => handleDrop(e, piece)}
+                                        className={`aspect-[512/210] cursor-move transition-all ${
+                                            piece.correctPosition === piece.currentPosition
+                                                ? 'ring-2 ring-emerald-500'
+                                                : 'hover:ring-2 hover:ring-blue-400'
+                                        }`}
+                                    >
+                                        {imageUrls[piece.correctPosition + 1] ? (
+                                            <img 
+                                                src={imageUrls[piece.correctPosition + 1]} 
+                                                alt={`Piece ${piece.correctPosition + 1}`}
+                                                className="w-full h-full object-cover"
+                                                draggable="false"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                <span className="text-gray-500">Loading...</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {isComplete && (
+                                <div className="mt-6 p-4 bg-emerald-100 rounded-lg text-center">
+                                    <p className="text-emerald-900 font-semibold text-lg">
+                                        🎉 Congratulations! You completed the puzzle in {formatTime(timer)}!
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow-lg p-4">
+                            <h3 className="font-semibold text-emerald-900 mb-2">How to Play:</h3>
+                            <ul className="text-sm text-gray-700 space-y-1">
+                                <li>• Drag and drop pieces to swap their positions</li>
+                                <li>• Pieces with green borders are in the correct position</li>
+                                <li>• Complete the puzzle as quickly as possible!</li>
+                                <li>• Click "New Game" to shuffle and start over</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<NZNotePuzzle />, document.getElementById('root'));
+    </script>
+</body>
+</html>

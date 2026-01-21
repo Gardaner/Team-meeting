@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Poster Creator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Fira Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            border-top: 4px solid #006272;
+        }
+        
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            color: #4a4a4a;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        
+        .question-box {
+            background: #f0f8f9;
+            border-left: 4px solid #006272;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 0;
+        }
+        
+        .question-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #006272;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+        }
+        
+        .question-text {
+            font-size: 18px;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #d1d1d1;
+            border-radius: 0;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #006272;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background: #006272;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 0;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background: #004d5a;
+        }
+        
+        button:active {
+            background: #003842;
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: #999;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+            padding: 15px;
+            border-radius: 0;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #4a4a4a;
+        }
+        
+        .prompt-section {
+            background: #f0f8f9;
+            border-left: 4px solid #006272;
+            margin-top: 40px;
+        }
+        
+        .accordion-header {
+            background: #006272;
+            color: white;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        
+        .accordion-header:hover {
+            background: #004d5a;
+        }
+        
+        .accordion-header h2 {
+            color: white;
+            font-size: 18px;
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .accordion-icon {
+            font-size: 24px;
+            transition: transform 0.3s;
+        }
+        
+        .accordion-icon.open {
+            transform: rotate(180deg);
+        }
+        
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 20px;
+        }
+        
+        .accordion-content.open {
+            max-height: 1000px;
+            padding: 20px;
+        }
+        
+        .prompt-box {
+            background: white;
+            border: 2px solid #d1d1d1;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #1a1a1a;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin-bottom: 10px;
+        }
+        
+        .prompt-placeholder {
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .copy-button {
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .clear-button {
+            width: 100%;
+            margin-top: 10px;
+            background: #dc3545;
+        }
+        
+        .clear-button:hover {
+            background: #c82333;
+        }
+        
+        .navigation {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+        
+        .nav-box {
+            background: #d1d1d1;
+            color: #666;
+            border: none;
+            padding: 20px 10px;
+            font-size: 18px;
+            font-weight: 700;
+            border-radius: 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .nav-box:hover {
+            background: #b8b8b8;
+            transform: translateY(-2px);
+        }
+        
+        .nav-box.answered {
+            background: #28a745;
+            color: white;
+        }
+        
+        .nav-box.answered:hover {
+            background: #218838;
+        }
+        
+        .nav-box.active {
+            border: 3px solid #006272;
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #006272;
+        }
+        
+        .question-indicator {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 15px;
+            font-weight: 600;
+        }
+        
+        .answer-status {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+            padding: 12px;
+            border-radius: 0;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .answer-status.answered {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>? Movie Poster Creator</h1>
+        <p class="subtitle">Answer your assigned question</p>
+        
+        <div id="loading" class="loading">
+            <p>Loading your question...</p>
+        </div>
+        
+        <form id="icebreakerForm" style="display: none;">
+            <div class="question-box">
+                <div class="question-label">Your Question</div>
+                <div class="question-text" id="questionText"></div>
+            </div>
+            
+            <div class="answer-status" id="answerStatus">
+                ? This question has already been answered
+            </div>
+            
+            <div class="form-group">
+                <label for="answer">Your Answer</label>
+                <textarea id="answer" name="answer" required placeholder="Share your answer..."></textarea>
+            </div>
+            
+            <button type="submit" id="submitBtn">Submit Answer</button>
+            
+            <div class="success-message" id="successMessage">
+                ? Thank you! Your answer has been submitted successfully.
+            </div>
+            
+            <div class="navigation" id="navigationBoxes">
+                <!-- Boxes will be generated by JavaScript -->
+            </div>
+            <div class="question-indicator" id="questionIndicator">Question 1 of 7</div>
+        </form>
+        
+        <div class="prompt-section">
+            <div class="accordion-header" onclick="toggleAccordion()">
+                <h2>Generated Prompt & Settings</h2>
+                <span class="accordion-icon" id="accordionIcon">?</span>
+            </div>
+            <div class="accordion-content" id="accordionContent">
+                <h3 style="color: #1a1a1a; font-size: 16px; margin-bottom: 15px; font-weight: 600;">Generated Prompt</h3>
+                <div class="prompt-box" id="generatedPrompt">
+                    <span class="prompt-placeholder">Waiting for all responses...</span>
+                </div>
+                <button class="copy-button" onclick="copyPrompt()" id="copyButton" style="display: none;">
+                    ? Copy Prompt to Clipboard
+                </button>
+                <button class="clear-button" onclick="clearAllAnswers()">
+                    ?? Clear All Answers
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            "Who is the main character?(cant be a copyrighted character)",
+            "What is the main character holding?",
+            "Who is the main character with?(cant be a copyrighted character)",
+            "What is the character holding?",
+            "Where is this taking place? (name a location)",
+            "What is taking place in the background of the poster?",
+            "What is the theme/style of the poster?"
+        ];
+
+        let assignedQuestion = null;
+        let questionIndex = null;
+        let questionOrder = []; // Will store randomized order
+
+        function getStorageKey() {
+            return 'moviePosterAnswers';
+        }
+        
+        function getOrderKey() {
+            return 'moviePosterQuestionOrder';
+        }
+        
+        function getStartQuestionKey() {
+            return 'moviePosterStartQuestion';
+        }
+        
+        function getRandomStartQuestion() {
+            // Check if we already have a start question for this session
+            const stored = sessionStorage.getItem(getStartQuestionKey());
+            if (stored !== null) {
+                return parseInt(stored);
+            }
+            
+            // Generate new random start question
+            const randomStart = Math.floor(Math.random() * 7);
+            sessionStorage.setItem(getStartQuestionKey(), randomStart);
+            return randomStart;
+        }
+        
+        function loadOrCreateQuestionOrder() {
+            try {
+                const stored = localStorage.getItem(getOrderKey());
+                if (stored) {
+                    return JSON.parse(stored);
+                } else {
+                    // Create randomized order
+                    const order = [0, 1, 2, 3, 4, 5, 6];
+                    // Fisher-Yates shuffle
+                    for (let i = order.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [order[i], order[j]] = [order[j], order[i]];
+                    }
+                    localStorage.setItem(getOrderKey(), JSON.stringify(order));
+                    return order;
+                }
+            } catch (e) {
+                console.error('Error with question order:', e);
+                return [0, 1, 2, 3, 4, 5, 6];
+            }
+        }
+
+        function loadAnswers() {
+            try {
+                const stored = localStorage.getItem(getStorageKey());
+                return stored ? JSON.parse(stored) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveAnswer(index, answer) {
+            try {
+                const answers = loadAnswers();
+                answers[index] = answer;
+                localStorage.setItem(getStorageKey(), JSON.stringify(answers));
+                return true;
+            } catch (e) {
+                console.error('Error saving:', e);
+                return false;
+            }
+        }
+
+        function initializeForm() {
+            try {
+                // Load or create randomized question order
+                questionOrder = loadOrCreateQuestionOrder();
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const userId = urlParams.get('user');
+                
+                if (userId) {
+                    questionIndex = (parseInt(userId) - 1) % questions.length;
+                } else {
+                    // Start on a random question
+                    questionIndex = getRandomStartQuestion();
+                }
+                
+                createNavigationBoxes();
+                loadQuestion();
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('icebreakerForm').style.display = 'block';
+                
+                updatePromptDisplay();
+                
+            } catch (error) {
+                console.error('Error initializing form:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: red;">Error loading form. Please refresh the page.</p>';
+            }
+        }
+        
+        function createNavigationBoxes() {
+            const container = document.getElementById('navigationBoxes');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 7; i++) {
+                const box = document.createElement('button');
+                box.type = 'button';
+                box.className = 'nav-box';
+                box.textContent = (i + 1);
+                box.onclick = () => goToQuestion(i);
+                container.appendChild(box);
+            }
+            
+            updateNavigationBoxes();
+        }
+        
+        function updateNavigationBoxes() {
+            const answers = loadAnswers();
+            const boxes = document.querySelectorAll('.nav-box');
+            
+            boxes.forEach((box, index) => {
+                const actualQuestionIndex = questionOrder[index];
+                
+                // Remove all status classes
+                box.classList.remove('answered', 'active');
+                
+                // Add answered class if this question has an answer
+                if (answers[actualQuestionIndex]) {
+                    box.classList.add('answered');
+                }
+                
+                // Add active class if this is the current question
+                if (index === questionIndex) {
+                    box.classList.add('active');
+                }
+            });
+        }
+        
+        function goToQuestion(index) {
+            questionIndex = index;
+            loadQuestion();
+            document.getElementById('successMessage').style.display = 'none';
+        }
+        
+        function loadQuestion() {
+            // Get the actual question index from the randomized order
+            const actualQuestionIndex = questionOrder[questionIndex];
+            assignedQuestion = questions[actualQuestionIndex];
+            
+            document.getElementById('questionText').textContent = assignedQuestion;
+            document.getElementById('questionIndicator').textContent = 'Question ' + (questionIndex + 1) + ' of 7';
+            
+            // Load existing answer if available (using actual question index)
+            const answers = loadAnswers();
+            const existingAnswer = answers[actualQuestionIndex] || '';
+            const answerField = document.getElementById('answer');
+            const submitBtn = document.getElementById('submitBtn');
+            const answerStatus = document.getElementById('answerStatus');
+            
+            if (existingAnswer) {
+                answerField.value = existingAnswer;
+                answerField.disabled = true;
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Answer Already Submitted';
+                answerStatus.classList.add('answered');
+            } else {
+                answerField.value = '';
+                answerField.disabled = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Answer';
+                answerStatus.classList.remove('answered');
+            }
+            
+            updateNavigationBoxes();
+        }
+        
+        function previousQuestion() {
+            questionIndex = questionIndex - 1;
+            if (questionIndex < 0) {
+                questionIndex = 6;
+            }
+            loadQuestion();
+            document.getElementById('successMessage').style.display = 'none';
+        }
+        
+        function nextQuestion() {
+            questionIndex = questionIndex + 1;
+            if (questionIndex > 6) {
+                questionIndex = 0;
+            }
+            loadQuestion();
+            document.getElementById('successMessage').style.display = 'none';
+        }
+        
+        function moveToNextUnanswered() {
+            const answers = loadAnswers();
+            let startIndex = questionIndex;
+            
+            // Try to find next unanswered question
+            for (let i = 0; i < 7; i++) {
+                questionIndex = (questionIndex + 1) % 7;
+                const actualQuestionIndex = questionOrder[questionIndex];
+                if (!answers[actualQuestionIndex]) {
+                    loadQuestion();
+                    return;
+                }
+            }
+            
+            // If all answered, stay on current
+            questionIndex = startIndex;
+            loadQuestion();
+        }
+        
+        function clearAllAnswers() {
+            if (confirm('Are you sure you want to clear all answers? This cannot be undone.')) {
+                try {
+                    localStorage.removeItem(getStorageKey());
+                    localStorage.removeItem(getOrderKey());
+                    sessionStorage.removeItem(getStartQuestionKey());
+                    // Reload to get new random order and start question
+                    location.reload();
+                } catch (e) {
+                    console.error('Error clearing answers:', e);
+                    alert('Error clearing answers. Please try again.');
+                }
+            }
+        }
+        
+        function toggleAccordion() {
+            const content = document.getElementById('accordionContent');
+            const icon = document.getElementById('accordionIcon');
+            
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.classList.remove('open');
+            } else {
+                content.classList.add('open');
+                icon.classList.add('open');
+            }
+        }
+
+        document.getElementById('icebreakerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const successMsg = document.getElementById('successMessage');
+            const answerField = document.getElementById('answer');
+            
+            // Get actual question index from randomized order
+            const actualQuestionIndex = questionOrder[questionIndex];
+            
+            // Check if this question already has an answer
+            const answers = loadAnswers();
+            if (answers[actualQuestionIndex]) {
+                alert('This question has already been answered. Use "Clear All Answers" to reset.');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            successMsg.style.display = 'none';
+            
+            const answer = answerField.value.trim();
+            
+            if (saveAnswer(actualQuestionIndex, answer)) {
+                successMsg.style.display = 'block';
+                answerField.disabled = true;
+                submitBtn.textContent = 'Answer Submitted';
+                document.getElementById('answerStatus').classList.add('answered');
+                updatePromptDisplay();
+                updateNavigationBoxes();
+                
+                // Hide success message and move to next unanswered question after 2 seconds
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                    moveToNextUnanswered();
+                }, 2000);
+            } else {
+                alert('Error saving your answer. Please try again.');
+                submitBtn.textContent = 'Submit Answer';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function updatePromptDisplay() {
+            const promptBox = document.getElementById('generatedPrompt');
+            const copyButton = document.getElementById('copyButton');
+            
+            const answerMap = loadAnswers();
+            const allAnswered = [0, 1, 2, 3, 4, 5, 6].every(i => answerMap[i] !== undefined && answerMap[i] !== '');
+            
+            if (allAnswered) {
+                const prompt = 'I want you to create a movie poster, the main character is ' + answerMap[0] + ', the main character is holding ' + answerMap[1] + ', they are with character two who is ' + answerMap[2] + ', character two is holding ' + answerMap[3] + ', both characters are located at ' + answerMap[4] + ', behind them ' + answerMap[5] + ' event is going on, this poster should be in the style of ' + answerMap[6] + '.';
+                
+                promptBox.textContent = prompt;
+                copyButton.style.display = 'block';
+            } else {
+                const answeredCount = Object.keys(answerMap).filter(k => answerMap[k]).length;
+                promptBox.innerHTML = '<span class="prompt-placeholder">Waiting for all responses... (' + answeredCount + '/7 answered)</span>';
+                copyButton.style.display = 'none';
+            }
+        }
+        
+        function copyPrompt() {
+            const promptText = document.getElementById('generatedPrompt').textContent;
+            navigator.clipboard.writeText(promptText).then(() => {
+                const btn = document.getElementById('copyButton');
+                const originalText = btn.textContent;
+                btn.textContent = '? Copied to Clipboard!';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+
+        // Update prompt display every 2 seconds to show new answers from other users
+        setInterval(updatePromptDisplay, 2000);
+
+        initializeForm();
+    </script>
+</body>
+</html>
