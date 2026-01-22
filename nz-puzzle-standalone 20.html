@@ -18,6 +18,7 @@
         const NZNotePuzzle = () => {
             const [pieces, setPieces] = useState([]);
             const [draggedPiece, setDraggedPiece] = useState(null);
+            const [selectedPiece, setSelectedPiece] = useState(null);
             const [timer, setTimer] = useState(0);
             const [isRunning, setIsRunning] = useState(false);
             const [isComplete, setIsComplete] = useState(false);
@@ -57,6 +58,7 @@
                 setTimer(0);
                 setIsRunning(true);
                 setIsComplete(false);
+                setSelectedPiece(null);
             };
 
             const shuffleArray = (array) => {
@@ -85,19 +87,37 @@
                 e.preventDefault();
                 if (!draggedPiece || draggedPiece.id === targetPiece.id) return;
 
-                const newPieces = [...pieces];
-                const draggedIndex = newPieces.findIndex(p => p.id === draggedPiece.id);
-                const targetIndex = newPieces.findIndex(p => p.id === targetPiece.id);
+                swapPieces(draggedPiece, targetPiece);
+                setDraggedPiece(null);
+            };
 
-                [newPieces[draggedIndex], newPieces[targetIndex]] = 
-                [newPieces[targetIndex], newPieces[draggedIndex]];
+            const handleTouchSelect = (piece) => {
+                if (!selectedPiece) {
+                    // First tap - select piece
+                    setSelectedPiece(piece);
+                } else if (selectedPiece.id === piece.id) {
+                    // Tap same piece - deselect
+                    setSelectedPiece(null);
+                } else {
+                    // Tap different piece - swap
+                    swapPieces(selectedPiece, piece);
+                    setSelectedPiece(null);
+                }
+            };
+
+            const swapPieces = (piece1, piece2) => {
+                const newPieces = [...pieces];
+                const index1 = newPieces.findIndex(p => p.id === piece1.id);
+                const index2 = newPieces.findIndex(p => p.id === piece2.id);
+
+                [newPieces[index1], newPieces[index2]] = 
+                [newPieces[index2], newPieces[index1]];
 
                 newPieces.forEach((piece, index) => {
                     piece.currentPosition = index;
                 });
 
                 setPieces(newPieces);
-                setDraggedPiece(null);
                 checkCompletion(newPieces);
             };
 
@@ -116,83 +136,108 @@
             };
 
             return (
-                <div className="min-h-screen bg-gradient-to-br from-teal-100 to-emerald-200 p-8">
+                <div className="min-h-screen bg-gradient-to-br from-teal-100 to-emerald-200 p-8" style={{background: 'linear-gradient(to bottom right, #a8e6cf, #56cc9d)'}}>
                     <div className="max-w-5xl mx-auto">
                         <div className="text-center mb-8">
-                            <h1 className="text-4xl font-bold text-emerald-900 mb-2">
+                            <h1 className="text-4xl font-bold mb-2" style={{color: '#0d5c3d'}}>
                                 NZ $20 Note Puzzle
                             </h1>
-                            <p className="text-emerald-700">Drag and drop pieces to complete the banknote</p>
+                            <p style={{color: '#0d5c3d'}}>Drag and drop pieces to complete the banknote</p>
                         </div>
 
                         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
                             <div className="flex justify-between items-center mb-4">
                                 <div className="flex items-center gap-4">
-                                    <div className="text-2xl font-bold text-emerald-900">
+                                    <div className="text-2xl font-bold" style={{color: '#0d5c3d'}}>
                                         Time: {formatTime(timer)}
                                     </div>
                                     {isComplete && (
-                                        <div className="flex items-center gap-2 text-emerald-600 font-semibold">
-                                            <span>🏆</span>
+                                        <div className="flex items-center gap-2 font-semibold" style={{color: '#2d9e6b'}}>
+                                            <span>?</span>
                                             <span>Completed!</span>
                                         </div>
                                     )}
                                 </div>
                                 <button
                                     onClick={initializePuzzle}
-                                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg transition"
+                                    className="flex items-center gap-2 text-white px-4 py-2 rounded-lg transition hover:opacity-90"
+                                    style={{backgroundColor: '#2d9e6b'}}
                                 >
-                                    <span>🔀</span>
+                                    <span>?</span>
                                     New Game
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-1 bg-gray-300 p-1 rounded-lg max-w-3xl mx-auto">
-                                {pieces.map((piece) => (
-                                    <div
-                                        key={piece.id}
-                                        draggable
-                                        onDragStart={(e) => handleDragStart(e, piece)}
-                                        onDragOver={handleDragOver}
-                                        onDrop={(e) => handleDrop(e, piece)}
-                                        className={`aspect-[512/210] cursor-move transition-all ${
-                                            piece.correctPosition === piece.currentPosition
-                                                ? 'ring-2 ring-emerald-500'
-                                                : 'hover:ring-2 hover:ring-blue-400'
-                                        }`}
-                                    >
-                                        {imageUrls[piece.correctPosition + 1] ? (
-                                            <img 
-                                                src={imageUrls[piece.correctPosition + 1]} 
-                                                alt={`Piece ${piece.correctPosition + 1}`}
-                                                className="w-full h-full object-cover"
-                                                draggable="false"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                                                <span className="text-gray-500">Loading...</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                            <div className="grid grid-cols-2 gap-1 p-1 rounded-lg max-w-3xl mx-auto" style={{backgroundColor: '#7ed8a9'}}>
+                                {pieces.map((piece) => {
+                                    const isCorrect = piece.correctPosition === piece.currentPosition;
+                                    const isSelected = selectedPiece && selectedPiece.id === piece.id;
+                                    
+                                    return (
+                                        <div
+                                            key={piece.id}
+                                            draggable
+                                            onDragStart={(e) => handleDragStart(e, piece)}
+                                            onDragOver={handleDragOver}
+                                            onDrop={(e) => handleDrop(e, piece)}
+                                            onClick={() => handleTouchSelect(piece)}
+                                            className="cursor-pointer transition-all select-none"
+                                            style={{
+                                                aspectRatio: '512/210',
+                                                outline: isSelected 
+                                                    ? '4px solid #2d9e6b'
+                                                    : isCorrect 
+                                                        ? '2px solid #2d9e6b' 
+                                                        : 'none',
+                                                outlineOffset: '-2px',
+                                                transform: isSelected ? 'scale(0.95)' : 'scale(1)',
+                                                touchAction: 'manipulation'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (!isCorrect && !isSelected) {
+                                                    e.currentTarget.style.outline = '2px solid #56cc9d';
+                                                    e.currentTarget.style.outlineOffset = '-2px';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isCorrect && !isSelected) {
+                                                    e.currentTarget.style.outline = 'none';
+                                                }
+                                            }}
+                                        >
+                                            {imageUrls[piece.correctPosition + 1] ? (
+                                                <img 
+                                                    src={imageUrls[piece.correctPosition + 1]} 
+                                                    alt={`Piece ${piece.correctPosition + 1}`}
+                                                    className="w-full h-full object-cover"
+                                                    draggable="false"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                    <span className="text-gray-500">Loading...</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )})}
                             </div>
 
                             {isComplete && (
-                                <div className="mt-6 p-4 bg-emerald-100 rounded-lg text-center">
-                                    <p className="text-emerald-900 font-semibold text-lg">
-                                        🎉 Congratulations! You completed the puzzle in {formatTime(timer)}!
+                                <div className="mt-6 p-4 rounded-lg text-center" style={{backgroundColor: '#a8e6cf'}}>
+                                    <p className="font-semibold text-lg" style={{color: '#0d5c3d'}}>
+                                        ? Congratulations! You completed the puzzle in {formatTime(timer)}!
                                     </p>
                                 </div>
                             )}
                         </div>
 
                         <div className="bg-white rounded-lg shadow-lg p-4">
-                            <h3 className="font-semibold text-emerald-900 mb-2">How to Play:</h3>
-                            <ul className="text-sm text-gray-700 space-y-1">
-                                <li>• Drag and drop pieces to swap their positions</li>
-                                <li>• Pieces with green borders are in the correct position</li>
-                                <li>• Complete the puzzle as quickly as possible!</li>
-                                <li>• Click "New Game" to shuffle and start over</li>
+                            <h3 className="font-semibold mb-2" style={{color: '#0d5c3d'}}>How to Play:</h3>
+                            <ul className="text-sm space-y-1" style={{color: '#0d5c3d'}}>
+                                <li>� <strong>Desktop:</strong> Drag and drop pieces to swap positions</li>
+                                <li>� <strong>Touch:</strong> Tap a piece to select it, then tap another to swap</li>
+                                <li>� Pieces with <span style={{color: '#2d9e6b', fontWeight: 'bold'}}>green borders</span> are in the correct position</li>
+                                <li>� Selected pieces have a <span style={{color: '#2d9e6b', fontWeight: 'bold'}}>thick green border</span></li>
+                                <li>� Complete the puzzle as quickly as possible!</li>
                             </ul>
                         </div>
                     </div>
